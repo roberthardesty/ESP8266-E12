@@ -23,7 +23,7 @@ String targetAPSSID = "";
 
 void sniffer(uint8_t *buf, uint16_t len) {
   clientScan.packetSniffer(buf, len, targetAP);
-  USE_SERIAL.println("||||");
+  USE_SERIAL.println("|-|\o/|-|");
 }
 
 void startWifi(){
@@ -31,8 +31,13 @@ void startWifi(){
   wifi_set_promiscuous_rx_cb(sniffer);
   WiFi.mode(WIFI_STA);
   WiFi.begin("davidjohnson", "ytsedrah");
-  USE_SERIAL.print("Reconnecting...\n");
-  delay(2000);
+  USE_SERIAL.print("Reconnecting...");
+      while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      USE_SERIAL.print(WiFi.status());
+      WiFi.begin("davidjohnson", "ytsedrah");
+    }
 }
 
 void stopWifi(){
@@ -47,13 +52,31 @@ void stopWifi(){
   //USE_SERIAL.println("enable promis");  
 }
 
-void httpPostResults(int i){
+void findMyNetwork(String mySsid){
+  while(targetAPSSID == ""){
+    USE_SERIAL.print("Finding My Network.");
+    
+    int results = WiFi.scanNetworks(false, true);
+    for(int i = 0; i < results; i++){
+      USE_SERIAL.print(".");
+      if(WiFi.SSID(i) == mySsid){
+        USE_SERIAL.print("\n\nTarget network " + WiFi.SSID(i)+ " has been located\n");
+        targetAPSSID = WiFi.SSID(i);
+        targetAP.set(WiFi.BSSID(i)[0], WiFi.BSSID(i)[1], WiFi.BSSID(i)[2], WiFi.BSSID(i)[3], WiFi.BSSID(i)[4], WiFi.BSSID(i)[5]);
+        return;
+      }      
+    }
+    delay(3000);
+  }
+}
+
+void httpPostResults(){
   USE_SERIAL.print("[HTTP] begin...\n");
   http.begin("192.168.1.68", 1880, "/test", false); //HTTP
   http.addHeader("Content-Type", "text/plain");
   USE_SERIAL.print("[HTTP] GET...\n");
   // start connection and send HTTP header
-  String foundClientsJSON = clientScan.sendResults(i);
+  String foundClientsJSON = clientScan.sendResults();
   int httpCode = http.POST(foundClientsJSON);
   
   // httpCode will be negative on error
@@ -64,7 +87,7 @@ void httpPostResults(int i){
       // file found at server
       if(httpCode == 200) {
           String payload = http.getString();
-          USE_SERIAL.println(payload);
+          USE_SERIAL.println("Sucessfully delivered: " + payload);
       }
   } else {
       USE_SERIAL.printf("[HTTP] GET... failed, error: ");
@@ -87,48 +110,34 @@ void setup() {
 
   EEPROM.begin(4096);
   SPIFFS.begin();
+  findMyNetwork("davidjohnson");
   startWifi();
 }
-bool isScanningMode = false;
 bool isSniffingMode = false;
 bool isPostMode = false;
 int count = 0;
 
 void loop() {
-  isScanningMode = targetAPSSID == "";
-  USE_SERIAL.println("target ap mac: " + targetAP.toString());
-  USE_SERIAL.print("target ssid: " + targetAPSSID + "\n");
-  if(count == 0 || isScanningMode){
-    USE_SERIAL.print("No target AP, enabling scan mode...\n");
+  if(count == 1) {
+    USE_SERIAL.println("\nStarting Network Monitor...\n");
+    wifi_promiscuous_enable(1);
+  }
+  if(count % 4 == 0) {
     stopWifi();
-    int results = WiFi.scanNetworks(false, true);
-    for(int i = 0; i < results; i++){
-      if(WiFi.SSID(i) == "davidjohnson"){
-        USE_SERIAL.print("Target AP Found: " + WiFi.SSID(i)+ "\n");
-        targetAPSSID = WiFi.SSID(i);
-        targetAP.set(WiFi.BSSID(i)[0], WiFi.BSSID(i)[1], WiFi.BSSID(i)[2], WiFi.BSSID(i)[3], WiFi.BSSID(i)[4], WiFi.BSSID(i)[5]);
-      }      
-    }
     startWifi();
-  }
-  if(count == 3) wifi_promiscuous_enable(1);
-  if(count == 5) {
-    startWifi();
-    String deviceList = "";
-    for(int i=0; i < 10; i++){
-      deviceList += clientScan.clients._get(i).toString();
-    }
     isPostMode = true;
-    USE_SERIAL.println("Done. prepping to post....");
+    USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
   }
-  delay(6000);
+  
+ 
   if(isPostMode){
-  for (int i = 0; i < clientScan.results; i++){
-    httpPostResults(i);
-    delay(1000);
+    httpPostResults();
+    USE_SERIAL.println("\nStarting Network Monitor...\n");
+    wifi_promiscuous_enable(1);
+    isPostMode = false;
   }
-    
-  }
+  
+  delay(4000);
   count++;
 }
 

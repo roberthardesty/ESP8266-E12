@@ -24,16 +24,18 @@ int ClientScan::add(Mac adr){
   return clientNum;
 }
 
-String ClientScan::sendResults(int i){
+String ClientScan::sendResults(){
   String json;
-      json = "{";
-      json += "\"i\":" + (String)i + ",";
-      json += "\"packets\":" + (String)packets[i] + ",";
-      json += "\"mac\":\"" + clients._get(i).toString() + "\",";
-      json += "\"vendor\":\"" + (String)getClientVendor(i) + "\",";
-      json += "}";
-      if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";
-      return json;
+  for(int i = 0; i < results; i++){
+    json += "{";
+    json += "\"i\":" + (String)i + ",";
+    json += "\"packets\":" + (String)packets[i] + ",";
+    json += "\"mac\":\"" + clients._get(i).toString() + "\",";
+    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\",";
+    json += "}";
+    if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";      
+  }     
+  return json;
 }
 
 String ClientScan::getClientVendor(int num) {
