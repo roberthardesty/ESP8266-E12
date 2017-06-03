@@ -23,7 +23,6 @@ String targetAPSSID = "";
 
 void sniffer(uint8_t *buf, uint16_t len) {
   clientScan.packetSniffer(buf, len, targetAP);
-  USE_SERIAL.println("|-|\o/|-|");
 }
 
 void startWifi(){
@@ -61,6 +60,7 @@ void findMyNetwork(String mySsid){
       USE_SERIAL.print(".");
       if(WiFi.SSID(i) == mySsid){
         USE_SERIAL.print("\n\nTarget network " + WiFi.SSID(i)+ " has been located\n");
+        USE_SERIAL.println("-----------------------------------------------\n");
         targetAPSSID = WiFi.SSID(i);
         targetAP.set(WiFi.BSSID(i)[0], WiFi.BSSID(i)[1], WiFi.BSSID(i)[2], WiFi.BSSID(i)[3], WiFi.BSSID(i)[4], WiFi.BSSID(i)[5]);
         return;
@@ -88,6 +88,7 @@ void httpPostResults(){
       if(httpCode == 200) {
           String payload = http.getString();
           USE_SERIAL.println("Sucessfully delivered: " + payload);
+          USE_SERIAL.println("-----------------------------------------------\n");
       }
   } else {
       USE_SERIAL.printf("[HTTP] GET... failed, error: ");
@@ -126,7 +127,9 @@ void loop() {
     stopWifi();
     startWifi();
     isPostMode = true;
+    USE_SERIAL.println("-----------------------------------------------\n");
     USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
+    USE_SERIAL.println("-----------------------------------------------\n");
   }
   
  
