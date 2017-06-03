@@ -22,7 +22,7 @@ class ClientScan {
     bool sniffing = false;
     MacList clients;
     int results = 0;
-    String sendResults(int i);
+    String sendResults();
     
     private:
       Mac from;
