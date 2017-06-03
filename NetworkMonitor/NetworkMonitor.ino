@@ -10,6 +10,7 @@
 #include "ClientScan.h"
 #include "Mac.h"
 #include "MacList.h"
+#include "HttpComm.h"
 
 extern "C" {
 #include "user_interface.h"
