@@ -31,7 +31,7 @@ String ClientScan::sendResults(){
     json += "\"i\":" + (String)i + ",";
     json += "\"packets\":" + (String)packets[i] + ",";
     json += "\"mac\":\"" + clients._get(i).toString() + "\",";
-    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\",";
+    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\"";
     json += "}";
     if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";  
     else json += "]";  

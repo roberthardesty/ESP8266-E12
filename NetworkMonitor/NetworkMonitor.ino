@@ -92,6 +92,7 @@ void setup() {
   SPIFFS.begin();
   findMyNetwork("davidjohnson");
   startWifi();
+  myHttp.defaultPOST("test");
 }
 bool isSniffingMode = false;
 bool isPostMode = false;

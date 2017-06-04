@@ -1,7 +1,7 @@
 #include "HttpComm.h"
 
 void HttpComm::defaultPOST(String json){
-  http.begin("192.168.1.68", 1800, "/test", false); //HTTP
+  http.begin(NODE_RED_HOME_HOST, NODE_RED_PORT, NODE_RED_HOME_DEFAULT_ENDPOINT, false); //HTTP
   http.addHeader("Content-Type", "text/plain");
   int httpCode = http.POST(json);
   

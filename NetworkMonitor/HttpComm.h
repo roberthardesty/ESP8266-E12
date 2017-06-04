@@ -7,7 +7,7 @@
 
 #define NODE_RED_HOME_HOST "192.168.1.68"
 #define NODE_RED_HOME_DEFAULT_ENDPOINT "/test"
-#define NODE_RED_PORT 1800
+#define NODE_RED_PORT 1880
 
 class HttpComm {
   public: 
