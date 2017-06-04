@@ -3,7 +3,6 @@
  */
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
 #include <FS.h>
 #include <EEPROM.h>
 #include "data.h"
@@ -17,7 +16,7 @@ extern "C" {
 }
 
 #define USE_SERIAL Serial
-HTTPClient http; 
+HttpComm myHttp;
 ClientScan clientScan;
 Mac targetAP;
 String targetAPSSID = "";
@@ -72,30 +71,9 @@ void findMyNetwork(String mySsid){
 }
 
 void httpPostResults(){
-  USE_SERIAL.print("[HTTP] begin...\n");
-  http.begin("192.168.1.68", 1880, "/test", false); //HTTP
-  http.addHeader("Content-Type", "text/plain");
-  USE_SERIAL.print("[HTTP] GET...\n");
-  // start connection and send HTTP header
   String foundClientsJSON = clientScan.sendResults();
-  int httpCode = http.POST(foundClientsJSON);
-  
-  // httpCode will be negative on error
-  if(httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      USE_SERIAL.printf("[HTTP] GET... code: %d\n", httpCode);
-  
-      // file found at server
-      if(httpCode == 200) {
-          String payload = http.getString();
-          USE_SERIAL.println("Sucessfully delivered: " + payload);
-          USE_SERIAL.println("-----------------------------------------------\n");
-      }
-  } else {
-      USE_SERIAL.printf("[HTTP] GET... failed, error: ");
-  }
-  
-  http.end();
+  USE_SERIAL.print("[HTTP] attempting to POST " + foundClientsJSON + "\n");
+  myHttp.defaultPOST(foundClientsJSON);
 }
 
 void setup() {
