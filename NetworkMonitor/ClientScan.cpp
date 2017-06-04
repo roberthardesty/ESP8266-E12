@@ -25,15 +25,16 @@ int ClientScan::add(Mac adr){
 }
 
 String ClientScan::sendResults(){
-  String json;
+  String json = "{\"clients\":[";
   for(int i = 0; i < results; i++){
     json += "{";
     json += "\"i\":" + (String)i + ",";
     json += "\"packets\":" + (String)packets[i] + ",";
     json += "\"mac\":\"" + clients._get(i).toString() + "\",";
-    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\",";
+    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\"";
     json += "}";
-    if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";      
+    if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";  
+    else json += "]";  
   }     
   return json;
 }

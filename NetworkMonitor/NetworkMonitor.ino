@@ -3,27 +3,26 @@
  */
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
-#include <ESP8266HTTPClient.h>
 #include <FS.h>
 #include <EEPROM.h>
 #include "data.h"
 #include "ClientScan.h"
 #include "Mac.h"
 #include "MacList.h"
+#include "HttpComm.h"
 
 extern "C" {
 #include "user_interface.h"
 }
 
 #define USE_SERIAL Serial
-HTTPClient http; 
+HttpComm myHttp;
 ClientScan clientScan;
 Mac targetAP;
 String targetAPSSID = "";
 
 void sniffer(uint8_t *buf, uint16_t len) {
   clientScan.packetSniffer(buf, len, targetAP);
-  USE_SERIAL.println("|-|\o/|-|");
 }
 
 void startWifi(){
@@ -61,6 +60,7 @@ void findMyNetwork(String mySsid){
       USE_SERIAL.print(".");
       if(WiFi.SSID(i) == mySsid){
         USE_SERIAL.print("\n\nTarget network " + WiFi.SSID(i)+ " has been located\n");
+        USE_SERIAL.println("-----------------------------------------------\n");
         targetAPSSID = WiFi.SSID(i);
         targetAP.set(WiFi.BSSID(i)[0], WiFi.BSSID(i)[1], WiFi.BSSID(i)[2], WiFi.BSSID(i)[3], WiFi.BSSID(i)[4], WiFi.BSSID(i)[5]);
         return;
@@ -71,29 +71,9 @@ void findMyNetwork(String mySsid){
 }
 
 void httpPostResults(){
-  USE_SERIAL.print("[HTTP] begin...\n");
-  http.begin("192.168.1.68", 1880, "/test", false); //HTTP
-  http.addHeader("Content-Type", "text/plain");
-  USE_SERIAL.print("[HTTP] GET...\n");
-  // start connection and send HTTP header
   String foundClientsJSON = clientScan.sendResults();
-  int httpCode = http.POST(foundClientsJSON);
-  
-  // httpCode will be negative on error
-  if(httpCode > 0) {
-      // HTTP header has been send and Server response header has been handled
-      USE_SERIAL.printf("[HTTP] GET... code: %d\n", httpCode);
-  
-      // file found at server
-      if(httpCode == 200) {
-          String payload = http.getString();
-          USE_SERIAL.println("Sucessfully delivered: " + payload);
-      }
-  } else {
-      USE_SERIAL.printf("[HTTP] GET... failed, error: ");
-  }
-  
-  http.end();
+  USE_SERIAL.print("[HTTP] attempting to POST " + foundClientsJSON + "\n");
+  myHttp.defaultPOST(foundClientsJSON);
 }
 
 void setup() {
@@ -112,6 +92,7 @@ void setup() {
   SPIFFS.begin();
   findMyNetwork("davidjohnson");
   startWifi();
+  myHttp.defaultPOST("test");
 }
 bool isSniffingMode = false;
 bool isPostMode = false;
@@ -126,7 +107,9 @@ void loop() {
     stopWifi();
     startWifi();
     isPostMode = true;
+    USE_SERIAL.println("-----------------------------------------------\n");
     USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
+    USE_SERIAL.println("-----------------------------------------------\n");
   }
   
  
