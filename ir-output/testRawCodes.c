@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include "irslinger.h"
+#include "irCodes.h"
 
 int main(int argc, char *argv[])
 {
-    if(argv[0] != 'v' || argv[0] != 'p' || argv[0] != 'm' || argv[0] != 's'){
+    if(argv[0] != 'vu' || argv[0] != 'vd' || argv[0] != 'p' || argv[0] != 'm' || argv[0] != 's'){
         printf("Invalid Agrument Dude: %s\n" argv[0]);
         return 1;
     }
@@ -12,6 +13,28 @@ int main(int argc, char *argv[])
 	double dutyCycle = 0.5;         // The duty cycle of the IR signal. 0.5 means for every cycle,
 	int repeatCodes[] = {9110, 2167, 610};       // the LED will turn on for half the cycle time, and off the other half
 	int repeatArray[argv[1] * 3];
+    
+    int *myIRCodes = null;
+    switch(argv[0]){
+        case 'vu':
+            myIRCodes = malloc(sizeof(VOLUME_UP));
+            break;
+        case 'vd':
+            myIRCodes = malloc(sizeof(VOLUME_DOWN));
+            break;
+        case 'p':
+            myIRCodes = malloc(sizeof(POWER));
+            break;
+        case 'm':
+            myIRCodes = malloc(sizeof(MUTE));
+            break;
+        case 's':
+            myIRCodes = malloc(sizeof(SOURCE));
+            break;
+        default:
+            break;
+    }
+    
 	int j;
 	for(j = 0; j < argv[1] * 3; j++){
 			int k;
