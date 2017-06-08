@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     //load desired command from header file
     int commandArray[71];
     if(commandType == "u")
-            commandArray = SANYO_VOLUME_UP;
+         memcpy(commandArray, SANYO_VOLUME_UP, 71 * sizeof(int));//   commandArray = SANYO_VOLUME_UP;
     else if(commandType == "d")
             commandArray = SANYO_VOLUME_DOWN;
     else if(commandType == "p")
