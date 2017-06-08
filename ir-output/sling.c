@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "irslinger.h"
-#include "ircodes.h"
+#include "irCodes.h"
 
 int main(int argc, char *argv[])
 {
@@ -22,20 +22,20 @@ int main(int argc, char *argv[])
     //load desired command from header file
     int commandArray[71];
     switch(commandType){
-        case "u":
-            commandArray = VOLUME_UP;
+        case VOLUME_UP_ARGS:
+            commandArray = SANYO_VOLUME_UP;
             break;
-        case "d":
-            commandArray = VOLUME_DOWN;
+        case VOLUME_DOWN_ARGS:
+            commandArray = SANYO_VOLUME_DOWN;
             break;
-        case "p":
-            commandArray = POWER;
+        case POWER_ARG:
+            commandArray = SANYO_POWER;
             break;
-        case "m":
-            commandArray = MUTE;
+        case MUTE_ARG:
+            commandArray = SANYO_MUTE;
             break;
-        case "s":
-            commandArray = SOURCE;
+        case SOURCE_ARG:
+            commandArray = SANYO_SOURCE;
             break;
         default:
             printf("Invalid Agrument Dude: %s\n" argv[0]);
