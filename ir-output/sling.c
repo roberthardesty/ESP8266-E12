@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "irslinger.h"
-#include "irCodes.h"
+#include "ircodes.h"
 
 int main(int argc, char *argv[])
 {
@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	double dutyCycle = 0.5;         // The duty cycle of the IR signal. 0.5 means for every cycle,
     int repeatCodes[] = {9110, 2167, 610};     
  
-    char commandType = (char)argv[0];    
+    char commandType = argv[0];    
     int repeatCodesCount = ((int)argv[1]) * 3;
     int repeatArray[repeatCodesCount];   
     
@@ -22,19 +22,19 @@ int main(int argc, char *argv[])
     //load desired command from header file
     int commandArray[71];
     switch(commandType){
-        case 'vu':
+        case "vu":
             commandArray = VOLUME_UP;
             break;
-        case 'vd':
+        case "vd":
             commandArray = VOLUME_DOWN;
             break;
-        case 'p':
+        case "p":
             commandArray = POWER;
             break;
-        case 'm':
+        case "m":
             commandArray = MUTE;
             break;
-        case 's':
+        case "s":
             commandArray = SOURCE;
             break;
         default:
