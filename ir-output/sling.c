@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 	double dutyCycle = 0.5;         // The duty cycle of the IR signal. 0.5 means for every cycle,
     int repeatCodes[] = {9110, 2167, 610};     
  
-    char commandType = argv[0];    
+    char commandType = (char)argv[0];    
     int repeatCodesCount = ((int)argv[1]) * 3;
     int repeatArray[repeatCodesCount];   
     
@@ -22,10 +22,10 @@ int main(int argc, char *argv[])
     //load desired command from header file
     int commandArray[71];
     switch(commandType){
-        case "vu":
+        case "u":
             commandArray = VOLUME_UP;
             break;
-        case "vd":
+        case "d":
             commandArray = VOLUME_DOWN;
             break;
         case "p":
