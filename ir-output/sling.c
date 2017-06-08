@@ -21,26 +21,19 @@ int main(int argc, char *argv[])
     
     //load desired command from header file
     int commandArray[71];
-    switch(commandType){
-        case VOLUME_UP_ARGS:
+    if(commandType == "u")
             commandArray = SANYO_VOLUME_UP;
-            break;
-        case VOLUME_DOWN_ARGS:
+    else if(commandType == "d")
             commandArray = SANYO_VOLUME_DOWN;
-            break;
-        case POWER_ARG:
+    else if(commandType == "p")
             commandArray = SANYO_POWER;
-            break;
-        case MUTE_ARG:
+    else if(commandType == "m")
             commandArray = SANYO_MUTE;
-            break;
-        case SOURCE_ARG:
+    else if(commandType == "s")
             commandArray = SANYO_SOURCE;
-            break;
-        default:
-            printf("Invalid Agrument Dude: %s\n" argv[0]);
-            return 1;
-            break;
+    else{
+        printf("Invalid Agrument Dude: %s\n" commandType);
+        return 1;
     }
     
     //copy command code array and subsequent repeat code array to one array
