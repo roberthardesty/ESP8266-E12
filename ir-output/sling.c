@@ -18,19 +18,19 @@ int main(int argc, char *argv[])
 	for(j = 0; j < repeatCodesCount; j+=3){
         repeatArray[j] = repeatCodes[j % 3];
 	}
-    
+    printf(commandType);
     //load desired command from header file
     int commandArray[71];
     if(commandType == "u")
          memcpy(commandArray, SANYO_VOLUME_UP, 71 * sizeof(int));//   commandArray = SANYO_VOLUME_UP;
     else if(commandType == "d")
-            commandArray = SANYO_VOLUME_DOWN;
+        memcpy(commandArray, SANYO_VOLUME_DOWN, 71 * sizeof(int));//   commandArray = SANYO_VOLUME_DOWN;
     else if(commandType == "p")
-            commandArray = SANYO_POWER;
+         memcpy(commandArray, SANYO_POWER, 71 * sizeof(int)); //commandArray = SANYO_POWER;
     else if(commandType == "m")
-            commandArray = SANYO_MUTE;
+         memcpy(commandArray, SANYO_MUTE, 71 * sizeof(int));//commandArray = SANYO_MUTE;
     else if(commandType == "s")
-            commandArray = SANYO_SOURCE;
+         memcpy(commandArray, SANYO_SOURCE, 71 * sizeof(int)); //  commandArray = SANYO_SOURCE;
     else{
         printf("Invalid Agrument Dude: %s\n" commandType);
         return 1;
