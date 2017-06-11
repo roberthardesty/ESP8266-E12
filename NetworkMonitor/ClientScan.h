@@ -6,6 +6,8 @@
 #include <ESP8266WiFi.h>
 #include "Mac.h"
 #include "MacList.h"
+#include "ClientModel.h"
+#include "ClientModelList.h"
 
 extern "C" {
 #include "user_interface.h"
@@ -20,7 +22,7 @@ class ClientScan {
     void packetSniffer(uint8_t *buf, uint16_t len, Mac ap);
     int add(Mac adr);
     bool sniffing = false;
-    MacList clients;
+    ClientModelList clients;
     int results = 0;
     String sendResults();
     

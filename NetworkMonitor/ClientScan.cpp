@@ -19,7 +19,7 @@ int ClientScan::add(Mac adr){
     Serial.println("Adding: " + adr.toString());
     data_getVendor(adr._get(0), adr._get(1), adr._get(2)).toCharArray(vendors[results], 9);
     results++;
-    int clientNum = clients.add(adr);
+    int clientNum = clients.add(adr, vendors[results]);
   }
   return clientNum;
 }
@@ -29,9 +29,9 @@ String ClientScan::sendResults(){
   for(int i = 0; i < results; i++){
     json += "{";
     json += "\"i\":" + (String)i + ",";
-    json += "\"packets\":" + (String)packets[i] + ",";
-    json += "\"mac\":\"" + clients._get(i).toString() + "\",";
-    json += "\"vendor\":\"" + (String)getClientVendor(i) + "\"";
+    json += "\"packets\":" + (String)clients._get(i).totalPackets + ",";
+    json += "\"mac\":\"" + clients._get(i).mac.toString() + "\",";
+    json += "\"vendor\":\"" + (String)clients._get(i).vendorLabel + "\"";
     json += "}";
     if ((i != results - 1) && (i != maxClientScanResults - 1)) json += ",";  
     else json += "]";  
@@ -49,7 +49,7 @@ void ClientScan::packetSniffer(uint8_t *buf, uint16_t len, Mac ap) {
     to.set(buf[22], buf[23], buf[24], buf[25], buf[26], buf[27]);
     if (ap.compare(from)) {
       int clientNum = add(to);
-      packets[clientNum]++;
+      clients.addPacket(clientNum);
     }
   }
 }
