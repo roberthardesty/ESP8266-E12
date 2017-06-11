@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     else if(commandType == "s")
          memcpy(commandArray, SANYO_SOURCE, 71 * sizeof(int)); //  commandArray = SANYO_SOURCE;
     else{
-        printf("Invalid Agrument Dude: %s\n" commandType);
+        printf("Invalid Agrument Dude: %s\n", commandType);
         return 1;
     }
     

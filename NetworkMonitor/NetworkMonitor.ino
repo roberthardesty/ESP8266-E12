@@ -10,12 +10,13 @@
 #include "Mac.h"
 #include "MacList.h"
 #include "HttpComm.h"
+#include "Settings.h"
 
 extern "C" {
 #include "user_interface.h"
 }
-
 #define USE_SERIAL Serial
+
 HttpComm myHttp;
 ClientScan clientScan;
 Mac targetAP;
@@ -29,32 +30,26 @@ void startWifi(){
   wifi_promiscuous_enable(0);
   wifi_set_promiscuous_rx_cb(sniffer);
   WiFi.mode(WIFI_STA);
-  WiFi.begin("davidjohnson", "ytsedrah");
-  USE_SERIAL.print("Reconnecting...");
-      while (WiFi.status() != WL_CONNECTED)
+  WiFi.config(HOME_IP, HOME_GATEWAY, HOME_SUBNET);
+  WiFi.begin(HOME_SSID, HOME_PASS);
+  USE_SERIAL.print("Connecting to WiFi...");
+    while (WiFi.status() != WL_CONNECTED)
     {
       delay(500);
-      USE_SERIAL.print(WiFi.status());
+      USE_SERIAL.print((String)WiFi.status());
       WiFi.begin("davidjohnson", "ytsedrah");
     }
 }
 
 void stopWifi(){
-  USE_SERIAL.println("Disable promis\n");  
-  wifi_promiscuous_enable(0);
-  USE_SERIAL.println("stopping WiFi\n");
+  USE_SERIAL.println("Disconnecting from WiFi\n");
   USE_SERIAL.println("-----------------------------------------------\n");
   WiFi.disconnect();
   wifi_set_opmode(STATION_MODE);
-  //wifi_set_channel(WiFi.channel());
- // wifi_promiscuous_enable(1);
-  //USE_SERIAL.println("enable promis");  
 }
 
 void findMyNetwork(String mySsid){
-  while(targetAPSSID == ""){
-    USE_SERIAL.print("Finding My Network.");
-    
+  while(targetAPSSID == ""){    
     int results = WiFi.scanNetworks(false, true);
     for(int i = 0; i < results; i++){
       USE_SERIAL.print(".");
@@ -71,47 +66,52 @@ void findMyNetwork(String mySsid){
 }
 
 void httpPostResults(){
+  delay(1000);
   String foundClientsJSON = clientScan.sendResults();
-  USE_SERIAL.print("[HTTP] attempting to POST " + foundClientsJSON + "\n");
+  USE_SERIAL.println("[HTTP] attempting to POST " + foundClientsJSON + "\n");
+  USE_SERIAL.println("Connected: " + (String)WiFi.status());
   myHttp.defaultPOST(foundClientsJSON);
 }
 
 void setup() {
   USE_SERIAL.begin(115200);
- // USE_SERIAL.setDebugOutput(true);
   USE_SERIAL.println(); USE_SERIAL.println(); USE_SERIAL.println();
-  for(uint8_t t = 4; t > 0; t--) {
+  for(uint8_t t = 3; t > 1; t--) {
       USE_SERIAL.printf("[SETUP] WAIT %d...\n", t);
       USE_SERIAL.flush();
       delay(1000);
   }
   pinMode(2, OUTPUT);
   digitalWrite(2, HIGH);
-
+  int startTime = millis();
+  
   EEPROM.begin(4096);
   SPIFFS.begin();
-  findMyNetwork("davidjohnson");
+  USE_SERIAL.print("Finding My Network\n\n");
+  findMyNetwork(HOME_SSID);
   startWifi();
-  myHttp.defaultPOST("test");
+  USE_SERIAL.println("Time from startup to connection: " + (String)(millis()-startTime));
 }
-bool isSniffingMode = false;
-bool isPostMode = false;
-int count = 0;
+
+static bool isPostMode = false;
+long roundInterval = 7000;
+unsigned long previousRoundTime = 0;
+static int testCount = 0;
 
 void loop() {
-  if(count == 1) {
-    USE_SERIAL.println("\nStarting Network Monitor...\n");
-    wifi_promiscuous_enable(1);
-  }
-  if(count % 4 == 0) {
+  unsigned long currentRoundTime = millis();
+  if(currentRoundTime - previousRoundTime > roundInterval){
+    previousRoundTime = currentRoundTime;
+    USE_SERIAL.println("Time Round: " + (String)testCount);
+    
     stopWifi();
     startWifi();
     isPostMode = true;
     USE_SERIAL.println("-----------------------------------------------\n");
-    USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
+    USE_SERIAL.print("Done. prepping to post..");
     USE_SERIAL.println("-----------------------------------------------\n");
+    testCount++; 
   }
-  
  
   if(isPostMode){
     httpPostResults();
@@ -120,7 +120,5 @@ void loop() {
     isPostMode = false;
   }
   
-  delay(4000);
-  count++;
 }
 
