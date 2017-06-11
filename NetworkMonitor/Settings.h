@@ -1,5 +1,5 @@
 //IPAddresses
-static IPAddress HOME_IP(192,168,1,68);
+static IPAddress HOME_IP(192,168,1,65);
 static IPAddress HOME_GATEWAY(192,168,1,1);
 static IPAddress HOME_SUBNET(255,255,255,0);
 

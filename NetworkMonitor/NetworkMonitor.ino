@@ -61,12 +61,11 @@ void findMyNetwork(String mySsid){
         return;
       }      
     }
-    delay(3000);
+    delay(2000);
   }
 }
 
 void httpPostResults(){
-  delay(1000);
   String foundClientsJSON = clientScan.sendResults();
   USE_SERIAL.println("[HTTP] attempting to POST " + foundClientsJSON + "\n");
   USE_SERIAL.println("Connected: " + (String)WiFi.status());
@@ -94,7 +93,7 @@ void setup() {
 }
 
 static bool isPostMode = false;
-long roundInterval = 7000;
+long roundInterval = 3000;
 unsigned long previousRoundTime = 0;
 static int testCount = 0;
 
@@ -118,6 +117,7 @@ void loop() {
     USE_SERIAL.println("\nStarting Network Monitor...\n");
     wifi_promiscuous_enable(1);
     isPostMode = false;
+    clientScan.clearList();
   }
   
 }
