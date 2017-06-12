@@ -97,22 +97,22 @@ void setup() {
 bool isSniffingMode = false;
 bool isPostMode = false;
 int count = 0;
-
+long roundTimeInterval = 15000;
+unsigned long currentRoundTime;
+unsigned long previousRoundTime = 0;
 void loop() {
-  if(count == 1) {
-    USE_SERIAL.println("\nStarting Network Monitor...\n");
-    wifi_promiscuous_enable(1);
-  }
-  if(count % 4 == 0) {
+  
+  currentRoundTime = millis();
+  if(currentRoundTime - previousRoundTime > roundTimeInterval){
     stopWifi();
     startWifi();
     isPostMode = true;
     USE_SERIAL.println("-----------------------------------------------\n");
     USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
     USE_SERIAL.println("-----------------------------------------------\n");
+    previousRoundTime = currentRoundTime;
+    count++;
   }
-  
- 
   if(isPostMode){
     httpPostResults();
     USE_SERIAL.println("\nStarting Network Monitor...\n");
@@ -120,7 +120,6 @@ void loop() {
     isPostMode = false;
   }
   
-  delay(4000);
-  count++;
+
 }
 
