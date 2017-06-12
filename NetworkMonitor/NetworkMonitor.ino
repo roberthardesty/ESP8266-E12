@@ -29,6 +29,7 @@ void startWifi(){
   wifi_promiscuous_enable(0);
   wifi_set_promiscuous_rx_cb(sniffer);
   WiFi.mode(WIFI_STA);
+  WiFi.config(IPAddress(192,168,1,65), IPAddress(192,168,1,1), IPAddress(255,255,255,0));
   WiFi.begin("davidjohnson", "ytsedrah");
   USE_SERIAL.print("Reconnecting...");
       while (WiFi.status() != WL_CONNECTED)
@@ -104,22 +105,25 @@ void loop() {
   
   currentRoundTime = millis();
   if(currentRoundTime - previousRoundTime > roundTimeInterval){
-    stopWifi();
-    startWifi();
-    isPostMode = true;
-    USE_SERIAL.println("-----------------------------------------------\n");
-    USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
-    USE_SERIAL.println("-----------------------------------------------\n");
+    if(clientScan.checkNetwork()) prepForPost();
+
     previousRoundTime = currentRoundTime;
-    count++;
   }
   if(isPostMode){
     httpPostResults();
     USE_SERIAL.println("\nStarting Network Monitor...\n");
     wifi_promiscuous_enable(1);
     isPostMode = false;
-  }
-  
+  } 
+}
 
+void prepForPost(){
+  stopWifi();
+  startWifi();
+  isPostMode = true;
+  USE_SERIAL.println("-----------------------------------------------\n");
+  USE_SERIAL.print("\n\nRound: #" + (String)(count) + " Done. prepping to post..");
+  USE_SERIAL.println("-----------------------------------------------\n"); 
+  count++;
 }
 

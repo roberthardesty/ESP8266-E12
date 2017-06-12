@@ -23,6 +23,7 @@ class ClientScan {
     MacList clients;
     int results = 0;
     String sendResults();
+    bool checkNetwork();
     
     private:
       Mac from;
