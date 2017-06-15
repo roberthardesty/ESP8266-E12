@@ -10,6 +10,7 @@
 #include "Mac.h"
 #include "MacList.h"
 #include "HttpComm.h"
+#include "Settings.h"
 
 extern "C" {
 #include "user_interface.h"
@@ -29,8 +30,8 @@ void startWifi(){
   wifi_promiscuous_enable(0);
   wifi_set_promiscuous_rx_cb(sniffer);
   WiFi.mode(WIFI_STA);
-  WiFi.config(IPAddress(192,168,1,65), IPAddress(192,168,1,1), IPAddress(255,255,255,0));
-  WiFi.begin("davidjohnson", "ytsedrah");
+  WiFi.config(HOME_STATIC_IP, HOME_STATIC_GATEWAY, HOME_STATIC_SUBNET);
+  WiFi.begin(HOME_SSID, HOME_PASS);
   USE_SERIAL.print("Reconnecting...");
       while (WiFi.status() != WL_CONNECTED)
     {

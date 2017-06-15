@@ -42,6 +42,7 @@ String ClientScan::sendResults(){
 String ClientScan::getClientVendor(int num) {
   return vendors[num];
 }
+
 int prevPackets = 0;
 char chromecast[9] = {"Azurewav"};
 bool ClientScan::checkNetwork(){
