@@ -10,6 +10,7 @@
 #include "Mac.h"
 #include "MacList.h"
 #include "HttpComm.h"
+#include "Settings.h"
 
 extern "C" {
 #include "user_interface.h"
@@ -29,7 +30,8 @@ void startWifi(){
   wifi_promiscuous_enable(0);
   wifi_set_promiscuous_rx_cb(sniffer);
   WiFi.mode(WIFI_STA);
-  WiFi.begin("davidjohnson", "ytsedrah");
+  WiFi.config(HOME_STATIC_IP, HOME_STATIC_GATEWAY, HOME_STATIC_SUBNET);
+  WiFi.begin(HOME_SSID, HOME_PASS);
   USE_SERIAL.print("Reconnecting...");
       while (WiFi.status() != WL_CONNECTED)
     {
@@ -97,30 +99,32 @@ void setup() {
 bool isSniffingMode = false;
 bool isPostMode = false;
 int count = 0;
-
+long roundTimeInterval = 15000;
+unsigned long currentRoundTime;
+unsigned long previousRoundTime = 0;
 void loop() {
-  if(count == 1) {
-    USE_SERIAL.println("\nStarting Network Monitor...\n");
-    wifi_promiscuous_enable(1);
-  }
-  if(count % 4 == 0) {
-    stopWifi();
-    startWifi();
-    isPostMode = true;
-    USE_SERIAL.println("-----------------------------------------------\n");
-    USE_SERIAL.print("\n\nRound: #" + (String)(count/4) + " Done. prepping to post..");
-    USE_SERIAL.println("-----------------------------------------------\n");
-  }
   
- 
+  currentRoundTime = millis();
+  if(currentRoundTime - previousRoundTime > roundTimeInterval){
+    if(clientScan.checkNetwork()) prepForPost();
+
+    previousRoundTime = currentRoundTime;
+  }
   if(isPostMode){
     httpPostResults();
     USE_SERIAL.println("\nStarting Network Monitor...\n");
     wifi_promiscuous_enable(1);
     isPostMode = false;
-  }
-  
-  delay(4000);
+  } 
+}
+
+void prepForPost(){
+  stopWifi();
+  startWifi();
+  isPostMode = true;
+  USE_SERIAL.println("-----------------------------------------------\n");
+  USE_SERIAL.print("\n\nRound: #" + (String)(count) + " Done. prepping to post..");
+  USE_SERIAL.println("-----------------------------------------------\n"); 
   count++;
 }
 

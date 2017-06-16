@@ -43,6 +43,25 @@ String ClientScan::getClientVendor(int num) {
   return vendors[num];
 }
 
+int prevPackets = 0;
+char chromecast[9] = {"Azurewav"};
+bool ClientScan::checkNetwork(){
+  int newPackets;
+  int i;
+  for(i=0; i < results; i++)
+  {
+      Serial.println(vendors[i]);
+      if((String)vendors[i] == (String)chromecast)
+      {
+        newPackets = packets[i] - prevPackets;
+        prevPackets += newPackets;
+        Serial.println("\n\nNew Packets from Azurewav: " + (String)newPackets);
+      }
+  }
+  
+  return newPackets > 2000;
+}
+
 void ClientScan::packetSniffer(uint8_t *buf, uint16_t len, Mac ap) {
   if (len > 27) {
     from.set(buf[16], buf[17], buf[18], buf[19], buf[20], buf[21]);
@@ -53,4 +72,5 @@ void ClientScan::packetSniffer(uint8_t *buf, uint16_t len, Mac ap) {
     }
   }
 }
+
 
