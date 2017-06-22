@@ -1,3 +1,4 @@
+#include <ArduinoJson.h>
 #include <cp437font.h>
 #include <LedMatrix.h>
 #include <Arduino.h>
@@ -11,12 +12,26 @@
 
 LedMatrix ledMatrix = LedMatrix(NUMBER_OF_DEVICES, CS_PIN);
 HttpComm myHttp;
+ DynamicJsonBuffer jsonBuffer;
 
 void ledInit(){
   ledMatrix.init();
   ledMatrix.setIntensity(LED_INTENSITY);
   ledMatrix.setCharWidth(CHAR_WIDTH);// range is 0-15
   ledMatrix.setRotation(true);
+}
+void startWifi(){
+  WiFi.mode(WIFI_STA);
+  if(WiFi.status() != WL_CONNECTED){
+    WiFi.begin("davidjohnson", "ytsedrah");
+    Serial.print("Reconnecting...");
+  }
+      while (WiFi.status() != WL_CONNECTED)
+    {
+      delay(500);
+      Serial.print(WiFi.status());
+      WiFi.begin("davidjohnson", "ytsedrah");
+    }
 }
 
 void setup() {
@@ -27,9 +42,30 @@ void setup() {
       Serial.flush();
       delay(1000);
   }
+  startWifi();
   ledInit();
-  myHttp.defaultGET();
+  String headLineString = myHttp.defaultGET();
+  while(headLineString == ""){
+    headLineString = myHttp.defaultGET();
+    delay(200);
+  }   
+  JsonObject& root = jsonBuffer.parse(headLineString);
+  if(root.success()){
+    Serial.println("Parsed Successfully");
+  }
+  else{
+    Serial.println("Parse FAIL");
+  }
+  JsonArray& articles = root["articles"];
+  for(JsonArray::iterator it=articles.begin(); it!=articles.end(); ++it) 
+  {
+    // it->value contains the JsonVariant which can be casted as usual
+    JsonObject& articleObject = *it;
+    const char* articleDescription = articleObject["description"];
+    Serial.println(articleDescription);
+  }
   ledMatrix.setText("DIRTY WORD! DIRTY WORD! DIRTY WORD! TGIF!");
+
 }
 
 void loop() {

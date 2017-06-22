@@ -5,7 +5,7 @@
 #include <ESP8266HTTPClient.h>
 
 
-#define NODE_RED_HOME_HOST "https://newsapi.org/v1/articles?source=techcrunch&sortBy=latest&apiKey=50d43fae948b4cb4931a8681fc9e50d6"
+#define NODE_RED_HOME_HOST "https://newsapi.org/v1/articles?source=techcrunch&sortBy=top&apiKey=50d43fae948b4cb4931a8681fc9e50d6"
 #define NODE_RED_PORT 80
 
 class HttpComm {
