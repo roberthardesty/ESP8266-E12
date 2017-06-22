@@ -44,11 +44,16 @@ void setup() {
   }
   startWifi();
   ledInit();
+  ledMatrix.setText("Loading");
+  
+  //get api data
   String headLineString = myHttp.defaultGET();
   while(headLineString == ""){
     headLineString = myHttp.defaultGET();
     delay(200);
   }   
+  
+  //parse api data
   JsonObject& root = jsonBuffer.parse(headLineString);
   if(root.success()){
     Serial.println("Parsed Successfully");
@@ -56,15 +61,17 @@ void setup() {
   else{
     Serial.println("Parse FAIL");
   }
+  
+  //loop through parsed data
   JsonArray& articles = root["articles"];
   for(JsonArray::iterator it=articles.begin(); it!=articles.end(); ++it) 
   {
-    // it->value contains the JsonVariant which can be casted as usual
     JsonObject& articleObject = *it;
-    const char* articleDescription = articleObject["description"];
-    Serial.println(articleDescription);
+    String articleTitle = articleObject["title"];
+    String articleDescription = articleObject["description"];
+    Serial.println("\n" + articleTitle + "\n\t" +articleDescription);
+    ledMatrix.setNextText(articleTitle + articleDescription);
   }
-  ledMatrix.setText("DIRTY WORD! DIRTY WORD! DIRTY WORD! TGIF!");
 
 }
 
