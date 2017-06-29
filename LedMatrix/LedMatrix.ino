@@ -12,7 +12,7 @@
 
 LedMatrix ledMatrix = LedMatrix(NUMBER_OF_DEVICES, CS_PIN);
 HttpComm myHttp;
- DynamicJsonBuffer jsonBuffer;
+DynamicJsonBuffer jsonBuffer;
 
 void ledInit(){
   ledMatrix.init();
@@ -80,5 +80,5 @@ void loop() {
   ledMatrix.scrollTextLeft();
   ledMatrix.drawText();
   ledMatrix.commit(); // commit transfers the byte buffer to the displays
-  delay(50);
+  delay(20);
 }
