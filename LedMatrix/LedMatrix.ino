@@ -11,14 +11,13 @@
 #define CHAR_WIDTH 7
 
 LedMatrix ledMatrix = LedMatrix(NUMBER_OF_DEVICES, CS_PIN);
-HttpComm myHttp;
-DynamicJsonBuffer jsonBuffer;
 
 void ledInit(){
   ledMatrix.init();
   ledMatrix.setIntensity(LED_INTENSITY);
   ledMatrix.setCharWidth(CHAR_WIDTH);// range is 0-15
   ledMatrix.setRotation(true);
+  ledMatrix.setText("Loading");
 }
 void startWifi(){
   WiFi.mode(WIFI_STA);
@@ -34,6 +33,46 @@ void startWifi(){
     }
 }
 
+String getHeadlineJson(){
+  HttpComm myHttp;
+  //get api data
+  String headLineString = myHttp.defaultGET();
+  while(headLineString == ""){
+    headLineString = myHttp.defaultGET();
+    delay(200);
+  }
+  return headLineString;
+}
+
+String parseHeadlineJson(String headLineString){
+  DynamicJsonBuffer jsonBuffer;
+  JsonObject& root = jsonBuffer.parse(headLineString);
+  if(root.success()){
+    Serial.println("Parsed Successfully");
+    headLineString = "";
+  }
+  else{
+    Serial.println("Parse FAIL");
+    return "";
+  }
+  
+  //loop through parsed data
+  JsonArray& articles = root["articles"];
+  int articleCount = articles.size();
+  Serial.println("articles: " + String(articleCount));
+  String headlines[articleCount];
+  int i = 0;
+  for(JsonArray::iterator it=articles.begin(); it!=articles.end(); ++it) 
+  {
+    JsonObject& articleObject = *it;
+    String articleTitle = articleObject["title"];
+    String articleDescription = articleObject["description"];
+    headlines[i] = (articleTitle + articleDescription);
+    i++;
+  }
+  return headlines[0];
+}
+
 void setup() {
   Serial.begin(115200); // For debugging output
   Serial.println(); Serial.println(); Serial.println();
@@ -44,35 +83,9 @@ void setup() {
   }
   startWifi();
   ledInit();
-  ledMatrix.setText("Loading");
-  
-  //get api data
-  String headLineString = myHttp.defaultGET();
-  while(headLineString == ""){
-    headLineString = myHttp.defaultGET();
-    delay(200);
-  }   
-  
-  //parse api data
-  JsonObject& root = jsonBuffer.parse(headLineString);
-  if(root.success()){
-    Serial.println("Parsed Successfully");
-  }
-  else{
-    Serial.println("Parse FAIL");
-  }
-  
-  //loop through parsed data
-  JsonArray& articles = root["articles"];
-  for(JsonArray::iterator it=articles.begin(); it!=articles.end(); ++it) 
-  {
-    JsonObject& articleObject = *it;
-    String articleTitle = articleObject["title"];
-    String articleDescription = articleObject["description"];
-    Serial.println("\n" + articleTitle + "\n\t" +articleDescription);
-    ledMatrix.setNextText(articleTitle + articleDescription);
-  }
-
+  String headlineJson = getHeadlineJson();
+  String parsedHeadline = parseHeadlineJson(headlineJson);
+  ledMatrix.setNextText(parsedHeadline);
 }
 
 void loop() {
