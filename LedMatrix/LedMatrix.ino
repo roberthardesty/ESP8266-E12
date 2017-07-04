@@ -8,10 +8,10 @@ LedMatrix ledMatrix = LedMatrix(NUMBER_OF_DEVICES, CS_PIN);
 void setup() {
   Serial.begin(115200); // For debugging output
   ledMatrix.init();
-  ledMatrix.setIntensity(4);
-  ledMatrix.setCharWidth(8);// range is 0-15
+  ledMatrix.setIntensity(6);
+  ledMatrix.setCharWidth(7);// range is 0-15
   ledMatrix.setRotation(true);
-  ledMatrix.setText("Brandon+HOFF FOREVER  Brandon Loves HOFF");
+  ledMatrix.setText("DIRTY WORD! DIRTY WORD! DIRTY WORD! TGIF!");
 }
 
 void loop() {
@@ -19,5 +19,5 @@ void loop() {
   ledMatrix.scrollTextLeft();
   ledMatrix.drawText();
   ledMatrix.commit(); // commit transfers the byte buffer to the displays
-  delay(200);
+  delay(50);
 }
