@@ -8,17 +8,20 @@
 class IRBugConfig {
   public: 
     byte wifiFailCount;
-    String ghostCode;
     byte configMode;
     byte transmitterMode;
-    bool isGhost;
-    bool isSetupMode;
+    String irCode;
+    int duration;
+    
     bool init();
     bool save();
-    void setGhostCode(byte hours, String code);
-  private: 
-    byte ghostHours;
+    bool load(String httpGetString);
+    
+  private:     
     void createConfig();
+    void extractProperties(JsonObject& root);
+    void addPropertiesToJson(JsonObject& root);
+
     JsonObject& loadConfigJSON();
 };
 
