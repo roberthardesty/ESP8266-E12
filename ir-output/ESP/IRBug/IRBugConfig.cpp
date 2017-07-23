@@ -32,7 +32,7 @@ bool IRBugConfig::load(String httpGetString){
   JsonObject& root = jsonBuffer.parse(httpGetString);
   if(root.success()){
     Serial.println("Parsed Successfully");
-    extractProperties(root);
+    extractProperties(root["data"]["result"]);
     return true;
   }
   Serial.println("Parse FAIL");

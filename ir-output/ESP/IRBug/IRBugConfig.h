@@ -6,7 +6,11 @@
 #include "FS.h"
 
 class IRBugConfig {
+
   public: 
+    IRBugConfig(){
+      init();
+    };
     byte wifiFailCount;
     byte configMode;
     byte transmitterMode;
@@ -15,14 +19,12 @@ class IRBugConfig {
     
     bool init();
     bool save();
-    bool load(String httpGetString);
+    bool load(String jsonString);
     
   private:     
     void createConfig();
     void extractProperties(JsonObject& root);
     void addPropertiesToJson(JsonObject& root);
-
-    JsonObject& loadConfigJSON();
 };
 
 

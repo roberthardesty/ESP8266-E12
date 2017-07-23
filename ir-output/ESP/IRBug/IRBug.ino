@@ -12,6 +12,7 @@ IRBugConfig configFile;
 void runSetupCycle(){
   HttpComm httpComm;
   bool isStillSetup = true;
+  
   unsigned long startTime = millis();
   while(isStillSetup){
     send_single_ir_code(VOLUME_MUTE);
