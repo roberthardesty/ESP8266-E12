@@ -7,6 +7,7 @@ void IRBugConfig::extractProperties(JsonObject& root){
   transmitterMode = root["transmitterMode"];
   irCode = root["irCode"].asString();
   duration = root["duration"];
+  canSend = root["canSend"];
 }
 //These two methods have been extracted to make changing the properties easier
 void IRBugConfig::addPropertiesToJson(JsonObject& root){
@@ -15,6 +16,7 @@ void IRBugConfig::addPropertiesToJson(JsonObject& root){
   root["transmitterMode"] = transmitterMode;
   root["irCode"] = irCode;
   root["duration"] = duration;
+  root["canSend"] = canSend;
 }
 
 

@@ -9,13 +9,14 @@ class IRBugConfig {
 
   public: 
     IRBugConfig(){
-      init();
+      //init();
     };
     byte wifiFailCount;
     byte configMode;
     byte transmitterMode;
     String irCode;
     int duration;
+    bool canSend;
     
     bool init();
     bool save();
