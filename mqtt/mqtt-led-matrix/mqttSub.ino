@@ -21,7 +21,7 @@ TODO:
 #include <Arduino.h>
 #include <PubSubClient.h>
 #include <QueueArray.h>
-#include <LEDMessage.h>
+#include "LEDMessage.h"
 //Constants
 #define NUMBER_OF_DEVICES 4
 #define CS_PIN 2
@@ -32,7 +32,12 @@ char * WORK_SSID = "javssecure";
 char * WORK_PASS = "JaV5L0u15ViLL3";
 char * HOME_SSID = "davidjohnson";
 char * HOME_PASS = "ytsedrah";
-const char* motion_event_topic = "devices/ledmatrix/message";
+
+const char* ledmatrix_home_topic = "trundle/places/home/ledmatrix";
+const char* ledmatrix_work_topic = "trundle/places/work/ledmatrix";
+const char* news_headline_topic = "trundle/headlines";
+
+
 const char* HOME_MQTT_ADDRESS = "107.202.1.107";
 const char* DEV_MQTT_ADDRESS = "192.168.1.67";
 
@@ -47,10 +52,20 @@ QueueArray <String> _messageQueue;
 byte _wifiNetwork = 0;
 unsigned long _loopMillis;
 unsigned long _loopCount;
-int _scrollSpeed = 20;
+int _scrollSpeed = 40;
 int _sameScrollCount = 0;
 bool _isScrollingSame = false;
-char msg[50];
+char msg[100];
+
+void quickPub(String message, byte status)
+{
+    ledMessage.status = status;
+    ledMessage.message = message;
+    ledMessage.waitMinutes = 0;
+    String msgString = ledMessage.getString();
+    msgString.toCharArray(msg, 100);
+    client.publish(ledmatrix_home_topic, msg);
+}
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
@@ -63,12 +78,19 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String jsonString = String(jsonPayload);
   bool isLoaded = ledMessage.load(jsonString);
   if(!isLoaded)
-    client.publish("", "Invalid Json");
-  else if(isLoaded && _messageQueue.count() > 10)
-    client.publish("","No Room Sorry");
+  {
+     quickPub("Invalid Json!", 3);
+  }
+  else if(isLoaded && _messageQueue.count() > 5)
+  {
+    Serial.print("The Queue is full");
+    quickPub("The Queue is Full!", 1);
+  }
   else
   {
-    _messageQueue.enqueue(ledMessage.messageString)
+    Serial.print("Adding message to queue: ");
+    Serial.println(ledMessage.message);
+    _messageQueue.enqueue(ledMessage.message);
     _isScrollingSame = false;
   }
 }
@@ -78,22 +100,23 @@ void reconnect() {
   while (!client.connected()) {
     Serial.print("Attempting MQTT connection...");
     // Attempt to connect
-    String clientId = "ESP8266Client-";
+    String clientId = "LEDMatrixClient-";
     clientId += String(random(0xffff), HEX);
-    if (client.connect(clientId.c_str())) {
+
+    if (client.connect(clientId.c_str()))
+    {
       Serial.println("connected");
-      // Once connected, publish an announcement...
-      client.publish(motion_event_topic, "E12 Button Connected");
-      //client.subscribe(motion_event_topic);
-    } else {
+      client.subscribe(news_headline_topic);
+      Serial.println(news_headline_topic);
+      quickPub("We are Connected!", 2);
+    }
+    else
+    {
       Serial.print("failed, rc=");
       Serial.print(client.state());
       Serial.println(" try again in 5 seconds");
       // Wait 5 seconds before retrying
-      for(int i = 0; i<5000; i++){
-        //motionStateChanged();
-        delay(1);
-      }
+      delay(5000);
     }
   }
 }
@@ -110,7 +133,7 @@ void startWifi(){
     }
     else if(_wifiNetwork == 1)
     {
-      Wifi.begin(WORK_SSID, WORK_PASS);
+      WiFi.begin(WORK_SSID, WORK_PASS);
       _wifiNetwork = 0;
     }
 
@@ -139,11 +162,14 @@ void ledInit(){
 }
 
 bool requestNewText(){
+  Serial.println("requesting text: ");
   if(_messageQueue.isEmpty()) return false;
-  String message = _messageQueue.dequeue()
+  String message = _messageQueue.dequeue();
+  Serial.println(message);
   ledMatrix.setNextText(message);
   return true;
 }
+
 
 void setup() 
 {
@@ -161,16 +187,20 @@ void setup()
 
   startWifi();
   
-  client.setServer(HOME_MQTT_ADDRESS, 1883);
+  client.setServer(DEV_MQTT_ADDRESS, 1883);
   client.setCallback(callback);
   
   ledInit();
-  ledMatrix.setNextText("Loading: Dictionary, Thesaurus, English Grammer Model");
+  ledMatrix.setNextText("Loading...");
 }
 
 void loop()
 {
 
+  if (!client.connected())
+  {
+    reconnect();
+  }
   client.loop();
   unsigned long currentMillis = millis();
 
@@ -185,16 +215,13 @@ void loop()
 
   _loopMillis = currentMillis;
 
-  if (!client.connected())
-  {
-    //reconnect();
-  }
 
   ledMatrix.clear();
   //If both these are true then we are ready for a new word but the QueueArray is empty
   if(ledMatrix.scrollTextLeft() && !requestNewText())
   {
-    _isScrollingSame = _sameScrollCount > 3;
+    _isScrollingSame = _sameScrollCount >= 1;
+    Serial.println("Single Same Scroll Condition hit");
     _sameScrollCount++;
   }
   ledMatrix.drawText();
@@ -203,10 +230,12 @@ void loop()
   //reset things for when we get a new message
   if(_isScrollingSame)
   {
+    Serial.println("We are idle, same scroll hit");
     ledMatrix.clear();
     ledMatrix.commit();
     _sameScrollCount = 0;
-    //publish idle status
+
+    quickPub("Idle, ready for more messages", 0);
   }
 
 }

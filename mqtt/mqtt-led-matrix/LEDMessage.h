@@ -12,11 +12,12 @@ class LEDMessage {
       //init();
     };
     byte wifiFailCount;
-    byte ledMatrixMode;
-    String messageString;
+    byte status;
+    String message;
+    byte waitMinutes;
     
     bool init();
-    bool save();
+    String getString();
     bool load(String jsonString);
     
   private:     
